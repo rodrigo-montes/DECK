@@ -4,7 +4,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/mssql-tools/bin:/roo
 export PATH
 (
   flock -n 222 || { exit 1; }
-
+  echo "$(date) CHECKDB" 
   cd /home/deck
   # curl -X POST -H 'Content-Type: application/json'  -d '{"chat_id": "-1002805964119", "text": "TEST INFO", "disable_notification": false}' https://api.telegram.org/bot7495994507:AAFWMsjMLLlgWKxywrK1rezA68deR15AYb4/sendMessage
   # curl -X POST -H 'Content-Type: application/json'  -d '{"chat_id": "-4936678208", "text": "TEST ALERTAS", "disable_notification": false}' https://api.telegram.org/bot7934392704:AAEOhVgIUWq7QVNzi_otAHuO5MPNiZlVecA/sendMessage
@@ -50,7 +50,7 @@ export PATH
   i=$(echo "show databases" | mysql --defaults-extra-file=/root/.my.cfg | grep zoftcom | wc -l)
   if [ $i -eq 0 ] ; then
     msg="MYSQL EES DOWN"
-    logger -t CHECKDB "$msg"
+    echo CHECKDB "$msg"
     echo ""  > /tmp/mysql.log.txt
     telegram "MYSQL-EES" "$msg"
     #php mail.php "$msg"
@@ -58,14 +58,14 @@ export PATH
   else 
     msg="MYSQL EES [OK]"
     telegram "MYSQL-EES" "$msg" CLR
-    logger -t CHECKDB 'MYSQL EES OK'
+    echo CHECKDB 'MYSQL EES OK'
   fi
 
   # NEUTRALIDAD
   i=$(echo "show databases" | mysql --defaults-extra-file=/root/.myivc.cfg -h 192.168.33.33 | grep zabbix3_ivc | wc -l)
   if [ $i -eq 0 ] ; then
     msg="NEUTRALIDAD MYSQL DOWN"
-    logger -t CHECKDB "$msg"
+    echo CHECKDB "$msg"
     echo ""  > /tmp/mysql.log.txt
     telegram "MYSQL-NEUTRALIDAD" "$msg"
     #php mail.php "$msg"
@@ -73,14 +73,14 @@ export PATH
   else 
     msg="NEUTRALIDAD MYSQL [OK]"
     telegram "MYSQL-NEUTRALIDAD" "$msg" CLR
-    logger -t CHECKDB 'NEUTRALIDAD MYSQL OK'
+    echo CHECKDB 'NEUTRALIDAD MYSQL OK'
   fi
 
   # MSSQL 
   i=$(/opt/mssql-tools/bin/sqlcmd  -S 192.168.33.7 -Usa -P Iblau2015 -s -W -Q "select domainname  from MailServer.dbo.hm_domains"  | grep "local.com" | wc -l)
   if [ $i -eq 0 ] ; then
     msg="MSSQL DOWN"
-    logger -t CHECKDB "$msg" 
+    echo CHECKDB "$msg" 
     echo ""  > /tmp/mysql.log.txt
     #php mail.php "$msg"
     telegram "MSSQL" "$msg"
@@ -88,7 +88,7 @@ export PATH
   else
     msg="MSSQL [OK]"
     telegram "MSSQL" "$msg" CLR
-    logger -t CHECKDB 'MSSQL OK'
+    echo CHECKDB 'MSSQL OK'
   fi
   if [ "$dateOK" == "1100" ] ; then
     msg="DB OK"
