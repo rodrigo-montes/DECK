@@ -20,16 +20,16 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
         else 
             if [ "$3" == "CLR" ] && [ $nv -ne 0 ]; then 
                 echo 0 > /tmp/$1.event
-                msg="$2"
-                msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
-                curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
+                msg="😆$2"
+                msgt="{\"chat_id\": \"$GINFO\", \"text\": \"$msg\", \"disable_notification\": true}"
+                curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_INFO
             else
                 if [ $nv -le 4 ] && [ "$3" != "CLR" ]; then 
                     let nv=nv+1
                     echo $nv > /tmp/$1.event
-                    msg="[$nv/5]: $2"
-                    msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
-                    curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
+                    msg="📢[$nv/5]: $2"
+                    msgt="{\"chat_id\": \"$GINFO\", \"text\": \"$msg\", \"disable_notification\": true}"
+                    curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_INFO
                 fi
             fi
         fi
@@ -39,10 +39,10 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
         v=$(ping -c 5 $1 | grep transmitted | awk '{gsub("%","");print $6}')
         if [ "$v" == "" ] ; then v=100; fi
         echo "$2 $1 LOST: $v%"
-        if [ $v -ne 0 ] ; then
+        if [ $v -eq 100 ] ; then
             telegram $1 "$2 $1 PING LOST: $v%"
         else 
-            telegram $1 "$2 $1 PING [OK] %" CLR
+            telegram $1 "$2 $1 PING [OK]" CLR
         fi
     }
 

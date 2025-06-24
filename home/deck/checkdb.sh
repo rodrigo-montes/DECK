@@ -22,14 +22,14 @@ export PATH
     else 
         if [ "$3" == "CLR" ] && [ $nv -ne 0 ]; then 
             echo 0 > /tmp/$1.event
-            msg="$2"
+            msg="😆$2"
             msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
             curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
         else
             if [ $nv -le 4 ] && [ "$3" != "CLR" ]; then 
                 let nv=nv+1
                 echo $nv > /tmp/$1.event
-                msg="[$nv/5]: $2"
+                msg="📢[$nv/5]: $2"
                 msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
                 curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
             fi

@@ -24,14 +24,14 @@ fi
         else 
             if [ "$3" == "CLR" ] && [ $nv -ne 0 ]; then 
                 echo 0 > /tmp/$1.event
-                msg="$2"
+                msg="😆$2"
                 msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
                 curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
             else
                 if [ $nv -le 4 ] && [ "$3" != "CLR" ]; then 
                     let nv=nv+1
                     echo $nv > /tmp/$1.event
-                    msg="[$nv/5]: $2"
+                    msg="📢[$nv/5]: $2"
                     msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
                     curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
                 fi
@@ -209,7 +209,7 @@ fi
     echo "SELECT host as HOSTNAME FROM viewHosts where status=0 and available=2 and host not like '%OLD%' and groupname='NEUTRALIDAD_MOVIL' order by 1" | timeout 15 mysql --defaults-extra-file=/home/deck/.ivc.cfg zabbix3_ivc | grep -v HOSTNAME | awk '{print $0,"<br>"'}  | head $LINES > /tmp/$p/tmp/neutralidad-movil-dead-host.txt
     footxt /tmp/$p/tmp/neutralidad-movil-dead-host.txt MYSQLIVC MOVILDOWN
 
-    if [ $a -ge 20 ] ; then
+    if [ $a -ge 10 ] ; then
         telegram NEU-MOVIL-VTR "NEU MOVIL VTR $a DOWN"
     else 
         telegram NEU-MOVIL-VTR "NEU MOVIL VTR $a [OK]" CLR
@@ -225,7 +225,7 @@ fi
     echo "SELECT host as HOSTNAME FROM viewHosts where status=0 and available=2 and host not like '%OLD%' and groupname='NEUTRALIDAD_MOVIL_CLARO' order by 1" | timeout 15 mysql --defaults-extra-file=/home/deck/.ivc.cfg zabbix3_ivc | grep -v HOSTNAME | awk '{print $0,"<br>"'}  | head $LINES > /tmp/$p/tmp/neutralidad-movil-dead-host.txt
     footxt /tmp/$p/tmp/neutralidad-movil-dead-host.txt MYSQLIVC CLAROMOVILDOWN
 
-     if [ $a -ge 20 ] ; then
+     if [ $a -ge 10 ] ; then
         telegram NEU-MOVIL-CLARO "NEU MOVIL CLARO $a DOWN"
     else 
         telegram NEU-MOVIL-CLARO "NEU MOVIL CLARO $a [OK]" CLR
@@ -238,29 +238,29 @@ fi
     footxt  /tmp/$p/tmp/hp.txt HOTSPOT DOWN
     
     # NEUTRALIDAD
-    timeout 5 sshpass -e ssh $IVC cat  /var/log/ivcserver-neutralidad.log | grep DONE  | grep -v TEST | grep -v Q | grep STATS | tail -4 | awk '{gsub("NEUTRALIDAD_","");print $1,$2,substr($4,13),$5," MES<br>"}' | tail -2 > /tmp/$p/tmp/stats-neutralidad.txt
-    timeout 5 sshpass -e ssh $IVC cat  /var/log/ivcserver-neutralidad.log | grep DONE  | grep -v TEST | grep Q | grep STATS | tail -4 | awk '{gsub("NEUTRALIDAD_","");print $1,$2,substr($4,13),$5," Q<br>"}' | tail -2 >> /tmp/$p/tmp/stats-neutralidad.txt
+    timeout 5 sshpass -e ssh $IVC zcat  /var/log/ivcserver-neutralidad.log-$(date +"%Y%m%d").gz | grep DONE  | grep -v TEST | grep -v Q | grep STATS | tail -4 | awk '{gsub("NEUTRALIDAD_","");print $1,$2,substr($4,13),$5," MES<br>"}' | tail -2 > /tmp/$p/tmp/stats-neutralidad.txt
+    timeout 5 sshpass -e ssh $IVC zcat  /var/log/ivcserver-neutralidad.log-$(date +"%Y%m%d").gz | grep DONE  | grep -v TEST | grep Q | grep STATS | tail -4 | awk '{gsub("NEUTRALIDAD_","");print $1,$2,substr($4,13),$5," Q<br>"}' | tail -2 >> /tmp/$p/tmp/stats-neutralidad.txt
     a=$(cat /tmp/$p/tmp/stats-neutralidad.txt | wc -l)
    
     foo $a IVC NEUTRALIDAD
     if [ $a -ne 4 ] ; then
         echo '<span#style="color:blue">' >> /tmp/$p/tmp/stats-neutralidad.txt
-        timeout 5 sshpass -e ssh $IVC cat  /var/log/ivcserver-neutralidad.log  | grep -v TEST | grep -v wp_options | grep '\[STATS\]' | tail -2 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $0,"<br>";}' >> /tmp/$p/tmp/stats-neutralidad.txt
+        timeout 5 sshpass -e ssh $IVC zcat  /var/log/ivcserver-neutralidad.log-$(date +"%Y%m%d").gz  | grep -v TEST | grep -v wp_options | grep '\[STATS\]' | tail -2 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $0,"<br>";}' >> /tmp/$p/tmp/stats-neutralidad.txt
         echo '</span>' >> /tmp/$p/tmp/stats-neutralidad.txt
     fi  
     echo '<span#style="color:blue">' >> /tmp/$p/tmp/stats-neutralidad.txt
-    timeout 5 sshpass -e ssh $IVC cat  /var/log/ivcserver-neutralidad.log  | grep -v TEST | grep -v wp_options | grep '\[STATS\]' | grep " All done in" | tail -1 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $0,"<br>";}' >> /tmp/$p/tmp/stats-neutralidad.txt
+    timeout 5 sshpass -e ssh $IVC zcat  /var/log/ivcserver-neutralidad.log-$(date +"%Y%m%d").gz  | grep -v TEST | grep -v wp_options | grep '\[STATS\]' | grep " All done in" | tail -1 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $0,"<br>";}' >> /tmp/$p/tmp/stats-neutralidad.txt
     echo '</span>' >> /tmp/$p/tmp/stats-neutralidad.txt
     
     footxt /tmp/$p/tmp/stats-neutralidad.txt IVC NEUTRALIDAD
 
-   timeout 5 sshpass -e ssh $IVC cat  /var/log/ivcserver-neutralidad.log | grep DONE  | grep -v TEST | grep STI | tail -2 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $6,$7,$8,"",$1,$2,"<br>"}' > /tmp/$p/tmp/stats-sti.txt
+    timeout 5 sshpass -e ssh $IVC zcat  /var/log/ivcserver-neutralidad.log-$(date +"%Y%m%d").gz | grep DONE  | grep -v TEST | grep STI | tail -2 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $6,$7,$8,"",$1,$2,"<br>"}' > /tmp/$p/tmp/stats-sti.txt
     touch /tmp/$p/tmp/stats-sti.txt
     a=$(cat /tmp/$p/tmp/stats-sti.txt | wc -l)
     foo $a IVC STI
     if [ $a -ne 2 ] ; then
         echo '<span#style="color:blue">' >> /tmp/$p/tmp/stats-sti.txt
-        timeout 5 sshpass -e ssh $IVC cat  /var/log/ivcserver-neutralidad.log | grep -v TEST | grep '\[STI\]' | grep All | tail -1 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $0,"<br>";}' >> /tmp/$p/tmp/stats-sti.txt
+        timeout 5 sshpass -e ssh $IVC zcat  /var/log/ivcserver-neutralidad.log-$(date +"%Y%m%d").gz | grep -v TEST | grep '\[STI\]' | grep All | tail -1 | awk '{gsub(" NEUTRALIDAD_","");gsub("\\[STATS\\] ","");gsub("done ","");print $0,"<br>";}' >> /tmp/$p/tmp/stats-sti.txt
         echo '</span>' >> /tmp/$p/tmp/stats-sti.txt
     fi 
     footxt /tmp/$p/tmp/stats-sti.txt IVC STI
