@@ -8,11 +8,11 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
     echo "$(date) PING" 
     
     telegram() {
-        GINFO=-1002805964119
-        GALERTA=-4936678208
-        URL_INFO="https://api.telegram.org/bot7495994507:AAFWMsjMLLlgWKxywrK1rezA68deR15AYb4/sendMessage"
-        URL_ALERTA="https://api.telegram.org/bot7934392704:AAEOhVgIUWq7QVNzi_otAHuO5MPNiZlVecA/sendMessage"
-
+        GINFO=-5224402961
+        GALERTA=-4893018440
+        URL_INFO="https://api.telegram.org/bot8967408977:AAEW0lXt21HIfEjrAt5GJdie1TpFIY3rh0s/sendMessage"
+        URL_ALERTA="https://api.telegram.org/bot8905921567:AAGihvlAIomIJCJ2vBJrTocr_5UIrky75BE/sendMessage"
+        
         touch /tmp/$1.event
         nv=$(cat /tmp/$1.event)
         if [ "$nv" == "" ] ; then 

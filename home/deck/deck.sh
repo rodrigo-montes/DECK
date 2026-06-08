@@ -12,10 +12,10 @@ fi
     cd /home/deck
 
     telegram() {
-        GINFO=7863865153
-        GALERTA=-4936678208
+        GINFO=-5224402961
+        GALERTA=-4893018440
         URL_INFO="https://api.telegram.org/bot8967408977:AAEW0lXt21HIfEjrAt5GJdie1TpFIY3rh0s/sendMessage"
-        URL_ALERTA="https://api.telegram.org/bot7934392704:AAEOhVgIUWq7QVNzi_otAHuO5MPNiZlVecA/sendMessage"
+        URL_ALERTA="https://api.telegram.org/bot8905921567:AAGihvlAIomIJCJ2vBJrTocr_5UIrky75BE/sendMessage"
 
         touch /tmp/$1.event
         nv=$(cat /tmp/$1.event)
@@ -24,7 +24,7 @@ fi
         else 
             if [ "$3" == "CLR" ] && [ $nv -ne 0 ]; then 
                 echo 0 > /tmp/$1.event
-                msg="👏 $2"
+                msg="👏 [0/0]: $2"
                 msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
                 curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
             else
@@ -70,7 +70,7 @@ fi
 
     disk() {
         h=$(date +%H | awk '{print $1*1}')
-        v=$(timeout 15 sshpass -e ssh $1 "df -h /" | awk '{gsub("%","");print $5}' | grep -v Use)
+        v=$(timeout 15 sshpass -e ssh $SSHUSER@$1 "df -h /" | awk '{gsub("%","");print $5}' | grep -v Use)
         if [ "$v" == "" ] ; then v=-1; fi
         mm=$(echo $v | awk '{printf "%d",$1+0.5}')
         if [ $mm -ge 90 ] ; then 
@@ -85,7 +85,7 @@ fi
         echo "update syslog.dash set v0=value where sign=2 and value > v0 and (servername='$1' or serverip='$1') and class='DISK0'" | mysql --defaults-extra-file=/home/deck/.local.cfg  -h MYSQL syslog
         echo "update syslog.dash set v0=value where (sign=1 and value < v0) or v0 = 0 and (servername='$1' or serverip='$1') and class='DISK0'" | mysql --defaults-extra-file=/home/deck/.local.cfg  -h MYSQL syslog
 
-        v=$(timeout 15 sshpass -e ssh $1 "df -h /home" | awk '{gsub("%","");print $5}' | grep -v Use)
+        v=$(timeout 15 sshpass -e ssh $SSHUSER@$1 "df -h /home" | awk '{gsub("%","");print $5}' | grep -v Use)
         if [ "$v" == "" ] ; then v=-1; fi
         echo $v > /tmp/$p/tmp/$1-disk1.txt
         echo "update dash set value=$v where (servername='$1' or serverip='$1') and class='DISK1'" | mysql --defaults-extra-file=/home/deck/.local.cfg  -h MYSQL syslog
@@ -95,7 +95,7 @@ fi
 
     servercpu() {
         h=$(date +%H | awk '{print $1*1}')
-        uptime=$(timeout 10 sshpass -e ssh $1 uptime | awk '{gsub(",","");print $(NF-2),$(NF-1),$(NF)'})
+        uptime=$(timeout 10 sshpass -e ssh $SSHUSER@$1 uptime | awk '{gsub(",","");print $(NF-2),$(NF-1),$(NF)'})
         v5=$(echo $uptime | awk '{print $1}')
         v10=$(echo $uptime | awk '{print $2}') 
         v15=$(echo $uptime | awk '{print $3}')
@@ -105,7 +105,7 @@ fi
         if [ "$v10" == "" ] ; then v10=-1; fi
         if [ "$v15" == "" ] ; then v15=-1; fi
         mm=$(echo $v5 | awk '{printf "%d",$1+0.5}')
-        if [ $mm -ge 10 ] ; then 
+        if [ $mm -ge 15 ] ; then 
             telegram "CPU-$3" "CPU ALTA: $1 $2 $v5"
         else 
             telegram "CPU-$3" "CPU NORMAL: $1 $2 $v5 [OK]" CLR
@@ -156,6 +156,7 @@ fi
 
     SSHPASS=iblau2015
     export SSHPASS
+    export SSHUSER=root
 
     dt=$(date +"%Y-%m-%d %H")
     dt2=$(date +"%b %d %H")
@@ -193,7 +194,7 @@ fi
     echo "SELECT host as HOSTNAME FROM viewHosts where status=0 and available=2 and host not like '%OLD%'and groupname='NEUTRALIDAD_CLARO' order by 1" | timeout 15 mysql --defaults-extra-file=/home/deck/.ivc.cfg zabbix3_ivc | grep -v HOSTNAME | awk '{print $0,"<br>";}' | head $LINES > /tmp/$p/tmp/neutralidad-fijo-dead-host.txt
     footxt /tmp/$p/tmp/neutralidad-fijo-dead-host.txt MYSQLIVC CLARODOWN
 
-    if [ $a -ge 20 ] ; then
+    if [ $a -ge 25 ] ; then
         telegram NEU-FIJO-CLARO "NEU FIJO CLARO $a DOWN"
     else 
         telegram NEU-FIJO-CLARO "NEU FIJO CLARO $a [OK]" CLR
@@ -209,7 +210,7 @@ fi
     echo "SELECT host as HOSTNAME FROM viewHosts where status=0 and available=2 and host not like '%OLD%' and groupname='NEUTRALIDAD_MOVIL' order by 1" | timeout 15 mysql --defaults-extra-file=/home/deck/.ivc.cfg zabbix3_ivc | grep -v HOSTNAME | awk '{print $0,"<br>"'}  | head $LINES > /tmp/$p/tmp/neutralidad-movil-dead-host.txt
     footxt /tmp/$p/tmp/neutralidad-movil-dead-host.txt MYSQLIVC MOVILDOWN
 
-    if [ $a -ge 10 ] ; then
+    if [ $a -ge 15 ] ; then
         telegram NEU-MOVIL-VTR "NEU MOVIL VTR $a DOWN"
     else 
         telegram NEU-MOVIL-VTR "NEU MOVIL VTR $a [OK]" CLR
@@ -749,34 +750,34 @@ fi
 
     #TELFONICA
     export SSHPASS='Kubertnet$2022'
-    TELEFONICA_SSH='ssh://admin@192.168.33.20:2222'
-    TELEFONICA_MYSQL_SSH='admin@192.168.33.20:2222'
-    TELEFONICA='192.168.33.20'
-    timeout 20 sshpass -e ssh -f -N -L 3307:127.0.0.1:3306 admin@192.168.33.20 -p 2222 
-    v=$(timeout 15 echo "SHOW processlist" | mysql --defaults-extra-file=/home/deck/.telefonica.cfg -h 127.0.0.1 -P 3307 2>&1 | wc -l)
+    export SSHUSER=admin
+    TELEFONICA_SSH='200.54.255.172'
+
+    disk $TELEFONICA_SSH TELEFONICA
+    servercpu $TELEFONICA_SSH TELEFONICA
+
+    v=$(timeout 15 sshpass -e ssh -p 2222 $SSHUSER@$TELEFONICA_SSH "echo 'show processlist '| mysql --defaults-extra-file=/home/ees/my-ees.cnf zoftcom " | wc -l)
     if [ "$v" == "" ]; then v=-1; fi
     if [ "$v" == "1" ]; then v=-1; fi
     echo $v  > /tmp/$p/tmp/cloud_EES_INGBELL_MYSQL-processlist.txt
     foo $v MYSQLTELEFONICA MYSQLPL
 
-    disk $TELEFONICA_SSH TELEFONICA
-    servercpu $TELEFONICA_SSH TELEFONICA
-
     #CLARO SNMP WEB
     export SSHPASS='Sof.,2025CoMWeb'
-    CLARO_SNMP_WEB_SSH='softcom@10.255.249.36'
+    export SSHUSER=softcom
     CLARO_SNMP_WEB='10.255.249.36'
 
-    disk $CLARO_SNMP_WEB_SSH CLAROWEB
-    servercpu $CLARO_SNMP_WEB_SSH CLAROWEB
+    disk $CLARO_SNMP_WEB CLAROWEB
+    servercpu $CLARO_SNMP_WEB CLAROWEB
 
     #CLARO SNMP COLLECTOR
     export SSHPASS='Sof..2025ComCol'
-    CLARO_SNMP_COLLECTOR_SSH='softcom@172.30.250.28'
+    export SSHUSER=softcom
     CLARO_SNMP_COLLECTOR='172.30.250.28'
 
-    disk $CLARO_SNMP_COLLECTOR_SSH CLAROCOLLECTOR
-    servercpu $CLARO_SNMP_COLLECTOR_SSH CLAROCOLLECTOR
+    disk $CLARO_SNMP_COLLECTOR CLAROCOLLECTOR
+    servercpu $CLARO_SNMP_COLLECTOR CLAROCOLLECTOR
+
     timeout 20 sshpass -e ssh -f -N -L 3308:127.0.0.1:3306 softcom@172.30.250.28 -p 2222 
     v=$(timeout 15 echo "SHOW processlist" | mysql --defaults-extra-file=/home/deck/.clarosnmp.cfg -h 127.0.0.1 -P 3308 2>&1 | wc -l)
     if [ "$v" == "" ]; then v=-1; fi
@@ -785,6 +786,7 @@ fi
     foo $v MYSQLCLAROCOLL MYSQLPL
 
 
+    #HAL9000
     timeout 10 wget --timeout 10 -q -O /tmp/perf.txt "http://192.168.33.7/perf.txt"
     dos2unix /tmp/perf.txt
     a=$(cat /tmp/perf.txt  | grep DISKSizeRemaining | awk '{printf "%.2f",$2/1024/1024/1024}')
