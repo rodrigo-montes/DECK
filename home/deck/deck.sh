@@ -12,9 +12,9 @@ fi
     cd /home/deck
 
     telegram() {
-        GINFO=-1002805964119
+        GINFO=7863865153
         GALERTA=-4936678208
-        URL_INFO="https://api.telegram.org/bot7495994507:AAFWMsjMLLlgWKxywrK1rezA68deR15AYb4/sendMessage"
+        URL_INFO="https://api.telegram.org/bot8967408977:AAEW0lXt21HIfEjrAt5GJdie1TpFIY3rh0s/sendMessage"
         URL_ALERTA="https://api.telegram.org/bot7934392704:AAEOhVgIUWq7QVNzi_otAHuO5MPNiZlVecA/sendMessage"
 
         touch /tmp/$1.event
@@ -24,14 +24,14 @@ fi
         else 
             if [ "$3" == "CLR" ] && [ $nv -ne 0 ]; then 
                 echo 0 > /tmp/$1.event
-                msg="😆$2"
+                msg="👏 $2"
                 msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
                 curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
             else
                 if [ $nv -le 4 ] && [ "$3" != "CLR" ]; then 
                     let nv=nv+1
                     echo $nv > /tmp/$1.event
-                    msg="📢[$nv/5]: $2"
+                    msg="📢 [$nv/5]: $2"
                     msgt="{\"chat_id\": \"$GALERTA\", \"text\": \"$msg\", \"disable_notification\": false}"
                     curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_ALERTA
                 fi
@@ -104,11 +104,11 @@ fi
         if [ "$v5" == "" ] ; then v5=-1; fi
         if [ "$v10" == "" ] ; then v10=-1; fi
         if [ "$v15" == "" ] ; then v15=-1; fi
-        mm=$(echo $v10 | awk '{printf "%d",$1+0.5}')
+        mm=$(echo $v5 | awk '{printf "%d",$1+0.5}')
         if [ $mm -ge 10 ] ; then 
-            telegram "CPU-$3" "CPU: $1 $2 5m:$v5 10m:$v10 15m:$v15"
+            telegram "CPU-$3" "CPU ALTA: $1 $2 $v5"
         else 
-            telegram "CPU-$3" "CPU: $1 $2 5m:$v5 10m:$v10 15m:$v15 [OK]" CLR
+            telegram "CPU-$3" "CPU NORMAL: $1 $2 $v5 [OK]" CLR
         fi
         echo "update dash set value=$v5 where (servername='$1' or serverip='$1') and class='5'"   | mysql --defaults-extra-file=/home/deck/.local.cfg  -h MYSQL syslog
         echo "update syslog.dash set v0=value where sign=2 and value > v0 and (servername='$1' or serverip='$1') and class='5'" | mysql --defaults-extra-file=/home/deck/.local.cfg  -h MYSQL syslog
@@ -231,11 +231,11 @@ fi
         telegram NEU-MOVIL-CLARO "NEU MOVIL CLARO $a [OK]" CLR
     fi
 
-    echo "SELECT code,updated FROM HOTSPOT.iden where id <> 897704 and updated <= date_add(now(), interval -1 hour)" | timeout 15 mysql --defaults-extra-file=/home/deck/.ees.cfg -h 192.168.33.9 | grep -v updated | awk '{print $2,$3,$1,"<br>";}' > /tmp/$p/tmp/hp.txt
-    v=$(cat /tmp/$p/tmp/hp.txt | wc -l)
-    foo $v HOTSPOT DOWN
-    echo "SELECT code,updated FROM HOTSPOT.iden where id <> 897704 and updated <= date_add(now(), interval -1 hour)" | timeout 15 mysql --defaults-extra-file=/home/deck/.ees.cfg -h 192.168.33.9 | grep -v updated | head $LINE | awk '{print $2,$3,"<strong>",$1,"</strong><br>";}' > /tmp/$p/tmp/hp.txt
-    footxt  /tmp/$p/tmp/hp.txt HOTSPOT DOWN
+    #echo "SELECT code,updated FROM HOTSPOT.iden where id <> 897704 and updated <= date_add(now(), interval -1 hour)" | timeout 15 mysql --defaults-extra-file=/home/deck/.ees.cfg -h 192.168.33.9 | grep -v updated | awk '{print $2,$3,$1,"<br>";}' > /tmp/$p/tmp/hp.txt
+    #v=$(cat /tmp/$p/tmp/hp.txt | wc -l)
+    #foo $v HOTSPOT DOWN
+    #echo "SELECT code,updated FROM HOTSPOT.iden where id <> 897704 and updated <= date_add(now(), interval -1 hour)" | timeout 15 mysql --defaults-extra-file=/home/deck/.ees.cfg -h 192.168.33.9 | grep -v updated | head $LINE | awk '{print $2,$3,"<strong>",$1,"</strong><br>";}' > /tmp/$p/tmp/hp.txt
+    #footxt  /tmp/$p/tmp/hp.txt HOTSPOT DOWN
     
     # NEUTRALIDAD
     timeout 5 sshpass -e ssh $IVC zcat  /var/log/ivcserver-neutralidad.log-$(date +"%Y%m%d").gz | grep DONE  | grep -v TEST | grep -v Q | grep STATS | tail -4 | awk '{gsub("NEUTRALIDAD_","");print $1,$2,substr($4,13),$5," MES<br>"}' | tail -2 > /tmp/$p/tmp/stats-neutralidad.txt
@@ -312,10 +312,10 @@ fi
     if [ "$v" == "" ] ; then v=-1; fi
     fooreplace $v CLOUD WS33NOOK
 
-    line=$(timeout 10 sshpass -e ssh $HOTSPOT cat /var/log/dnsparse.log | grep logfile | grep "^$dt")
-    v=$(echo $line | awk '{gsub("queries:","");print $8*1}')
-    if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD MOVISTAR_DNS
+    #line=$(timeout 10 sshpass -e ssh $HOTSPOT cat /var/log/dnsparse.log | grep logfile | grep "^$dt")
+    #v=$(echo $line | awk '{gsub("queries:","");print $8*1}')
+    #if [ "$v" == "" ] ; then v=-1; fi
+    #fooreplace $v CLOUD MOVISTAR_DNS
 
     v=$(timeout 20 sshpass -e ssh  $EES_CLOUD_ETL cat /var/log/etlivc.log | grep -v "[eE]rror" | grep "^$dt" | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
@@ -435,20 +435,20 @@ fi
     echo $v  > /tmp/$p/tmp/cloud_EES_INGBELL_MYSQL-processlist.txt
     foo $v CLOUDMYSQLINGBELL MYSQLPL
 
-    v=$(timeout 10 echo "SELECT count(*) as cnt  FROM syslogng.logs where facility='user' and datetime> date_add(now(),interval -1 hour) and msg like '%WIFI: IDEN %'" | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 2>&1 | tail -1)
-    if [ "$v" == "" ]; then v=-1; fi
-    if [ "$v" == "1" ]; then v=-1; fi
-    fooreplace $v HOTSPOT WIFI
+    #v=$(timeout 10 echo "SELECT count(*) as cnt  FROM syslogng.logs where facility='user' and datetime> date_add(now(),interval -1 hour) and msg like '%WIFI: IDEN %'" | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 2>&1 | tail -1)
+    #if [ "$v" == "" ]; then v=-1; fi
+    #if [ "$v" == "1" ]; then v=-1; fi
+    #fooreplace $v HOTSPOT WIFI
 
-    v=$(timeout 10 echo "SELECT count(*) as cnt FROM HOTSPOT.login where updated> date_add(now(),interval -1 hour) and mac is not null and logout is not null" | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 2>&1 | tail -1)
-    if [ "$v" == "" ]; then v=-1; fi
-    if [ "$v" == "1" ]; then v=-1; fi
-    fooreplace $v HOTSPOT LOGIN
+    #v=$(timeout 10 echo "SELECT count(*) as cnt FROM HOTSPOT.login where updated> date_add(now(),interval -1 hour) and mac is not null and logout is not null" | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 2>&1 | tail -1)
+    #if [ "$v" == "" ]; then v=-1; fi
+    #if [ "$v" == "1" ]; then v=-1; fi
+    #fooreplace $v HOTSPOT LOGIN
 
-    v=$(timeout 10 echo " SELECT count(*) FROM HOTSPOT.iden where id <> 897704 and updated> date_add(now(),interval -4 hour)" | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 2>&1 | tail -1)
-    if [ "$v" == "" ]; then v=-1; fi
-    if [ "$v" == "1" ]; then v=-1; fi
-    fooreplace $v HOTSPOT AVAILABILITY
+    #v=$(timeout 10 echo " SELECT count(*) FROM HOTSPOT.iden where id <> 897704 and updated> date_add(now(),interval -4 hour)" | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 2>&1 | tail -1)
+    #if [ "$v" == "" ]; then v=-1; fi
+    #if [ "$v" == "1" ]; then v=-1; fi
+    #fooreplace $v HOTSPOT AVAILABILITY
 
     v=$(timeout 10 echo " select round(sum(inter)/1000/1000,0) as s from ISP_VTR.rx_tx  where datetime>=from_unixtime(round(FLOOR(unix_timestamp(DATE_ADD(now(),INTERVAL 0 MINUTE))/(60*60))*(60*60)))" | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 2>&1 | tail -1)
     if [ "$v" == "" ]; then v=-1; fi
@@ -546,7 +546,7 @@ fi
     ##disk $EES_CLOUD_DNS2
     disk $IVC IVC
     disk $IVC_ETL IVC_ETL
-    disk $HOTSPOT HOTSPOT
+    #disk $HOTSPOT HOTSPOT
     disk $EES_CLOUD_DEVEL EES_DEVEL
 
     #echo "."
@@ -746,6 +746,44 @@ fi
        v=-1
     fi
     fooreplace $v INGBELL WS33NOOK
+
+    #TELFONICA
+    export SSHPASS='Kubertnet$2022'
+    TELEFONICA_SSH='ssh://admin@192.168.33.20:2222'
+    TELEFONICA_MYSQL_SSH='admin@192.168.33.20:2222'
+    TELEFONICA='192.168.33.20'
+    timeout 20 sshpass -e ssh -f -N -L 3307:127.0.0.1:3306 admin@192.168.33.20 -p 2222 
+    v=$(timeout 15 echo "SHOW processlist" | mysql --defaults-extra-file=/home/deck/.telefonica.cfg -h 127.0.0.1 -P 3307 2>&1 | wc -l)
+    if [ "$v" == "" ]; then v=-1; fi
+    if [ "$v" == "1" ]; then v=-1; fi
+    echo $v  > /tmp/$p/tmp/cloud_EES_INGBELL_MYSQL-processlist.txt
+    foo $v MYSQLTELEFONICA MYSQLPL
+
+    disk $TELEFONICA_SSH TELEFONICA
+    servercpu $TELEFONICA_SSH TELEFONICA
+
+    #CLARO SNMP WEB
+    export SSHPASS='Sof.,2025CoMWeb'
+    CLARO_SNMP_WEB_SSH='softcom@10.255.249.36'
+    CLARO_SNMP_WEB='10.255.249.36'
+
+    disk $CLARO_SNMP_WEB_SSH CLAROWEB
+    servercpu $CLARO_SNMP_WEB_SSH CLAROWEB
+
+    #CLARO SNMP COLLECTOR
+    export SSHPASS='Sof..2025ComCol'
+    CLARO_SNMP_COLLECTOR_SSH='softcom@172.30.250.28'
+    CLARO_SNMP_COLLECTOR='172.30.250.28'
+
+    disk $CLARO_SNMP_COLLECTOR_SSH CLAROCOLLECTOR
+    servercpu $CLARO_SNMP_COLLECTOR_SSH CLAROCOLLECTOR
+    timeout 20 sshpass -e ssh -f -N -L 3308:127.0.0.1:3306 softcom@172.30.250.28 -p 2222 
+    v=$(timeout 15 echo "SHOW processlist" | mysql --defaults-extra-file=/home/deck/.clarosnmp.cfg -h 127.0.0.1 -P 3308 2>&1 | wc -l)
+    if [ "$v" == "" ]; then v=-1; fi
+    if [ "$v" == "1" ]; then v=-1; fi
+    echo $v  > /tmp/$p/tmp/cloud_EES_INGBELL_MYSQL-processlist.txt
+    foo $v MYSQLCLAROCOLL MYSQLPL
+
 
     timeout 10 wget --timeout 10 -q -O /tmp/perf.txt "http://192.168.33.7/perf.txt"
     dos2unix /tmp/perf.txt
