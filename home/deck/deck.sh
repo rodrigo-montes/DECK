@@ -105,7 +105,7 @@ fi
         if [ "$v10" == "" ] ; then v10=-1; fi
         if [ "$v15" == "" ] ; then v15=-1; fi
         mm=$(echo $v5 | awk '{printf "%d",$1+0.5}')
-        if [ $mm -ge 15 ] ; then 
+        if [ $mm -ge 20 ] ; then 
             telegram "CPU-$3" "CPU ALTA: $1 $2 $v5"
         else 
             telegram "CPU-$3" "CPU NORMAL: $1 $2 $v5 [OK]" CLR
@@ -348,19 +348,19 @@ fi
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/expire.log | grep "DONE" | grep "^$dt" | grep dns | awk 'BEGIN{sum=0}{sum=sum+$7}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD EXPIRE-DNS
+    fooreplace $v $EES_CLOUD_POST1 EXPIRE-DNS
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/expire.log | grep "DONE" | grep "^$dt" | grep -v dns | awk 'BEGIN{sum=0}{sum=sum+$6}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD EXPIRE-RXTX
+    fooreplace $v $EES_CLOUD_POST1 EXPIRE-RXTX
     
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/expire.log | grep "ERROR" | grep "^$dt" | grep dns | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD EXPIRE-DNS-ERROR
+    fooreplace $v $EES_CLOUD_POST1 EXPIRE-DNS-ERROR
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/expire.log | grep "ERROR" | grep "^$dt" | grep rx_tx | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD EXPIRE-RXTX-ERROR
+    fooreplace $v $EES_CLOUD_POST1 EXPIRE-RXTX-ERROR
 
     a=$(timeout 5 sshpass -e ssh  $IVC ls -al /usr/share/zabbix/navis/upload/upload1/ 2>/dev/null | wc -l)
     b=$(timeout 5 sshpass -e ssh  $IVC ls -al /usr/share/zabbix/navis/upload/upload2/ 2>/dev/null | wc -l) 
@@ -652,43 +652,43 @@ fi
     a=$(cat /tmp/$p/tmp/bkpees.txt| wc -l)
     if [ "$a" == "" ]; then a=-1; fi
     foo $a INGBELL BACKUP
-    footxt /tmp/$p/tmp/bkpees.txt INGBELL BACKUP
+    footxt /tmp/$p/tmp/bkpees.txt $INGBELL_MYSQL BACKUP
 
     v=$(timeout 15 sshpass -e ssh $INGBELL_NF cat /var/log/netacc.log | grep Process | grep "$dt" | awk 'BEGIN{s=0}{s=s+$4}END{print s}')
     if [ "$v" == "" ]; then v=-1; fi
-    fooreplace $v INGBELL NETACC
+    fooreplace $v $INGBELL_NF NETACC
      
     v=$(timeout 10 sshpass -e ssh $INGBELL_DNS1 cat /var/log/dnsparse.log | grep logfile | grep "^$dt" | awk '{print $8}' | grep queries | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL DNS1
+    fooreplace $v $INGBELL_DNS1 DNS1
 
     v=$(timeout 10 sshpass -e ssh $INGBELL_DNS2 cat /var/log/dnsparse.log | grep logfile | grep "^$dt" | awk '{print $8}' | grep queries | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL DNS2
+    fooreplace $v $INGBELL_DNS2 DNS2
 
     v=$(timeout 10 sshpass -e ssh $INGBELL_DNS1 cat /var/log/dnsparse.log | grep "log-file" | grep "^$dt" | awk '{print $8}' | grep consultas | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL T-DNS1
+    fooreplace $v $INGBELL_DNS1 T-DNS1
 
     v=$(timeout 10 sshpass -e ssh $INGBELL_DNS2 cat /var/log/dnsparse.log | grep "log-file" | grep "^$dt" | awk '{print $8}' | grep consultas | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL T-DNS2
+    fooreplace $v $INGBELL_DNS2 T-DNS2
 
     v=$(timeout 10 sshpass -e ssh $INGBELL_NF cat /var/log/expire.log | grep "DONE" | grep "^$dt" | grep dns | awk 'BEGIN{sum=0}{sum=sum+$7}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL EXPIRE-DNS
+    fooreplace $v $INGBELL_NF EXPIRE-DNS
 
     v=$(timeout 10 sshpass -e ssh $INGBELL_NF cat /var/log/expire.log | grep "DONE" | grep "^$dt" | grep -v dns | awk 'BEGIN{sum=0}{sum=sum+$6}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL EXPIRE-RXTX
+    fooreplace $v $INGBELL_NF EXPIRE-RXTX
 
     v=$(timeout 10 sshpass -e ssh $INGBELL_NF cat /var/log/expire.log | grep "ERROR" | grep "^$dt" | grep dns | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL EXPIRE-DNS-ERROR
+    fooreplace $v $INGBELL_NF EXPIRE-DNS-ERROR
 
     v=$(timeout 10 sshpass -e ssh $INGBELL_NF cat /var/log/expire.log | grep "ERROR" | grep "^$dt" | grep rx_tx | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v INGBELL EXPIRE-RXTX-ERROR
+    fooreplace $v $INGBELL_NF EXPIRE-RXTX-ERROR
 
     v=$(echo "SELECT count(*) as cnt FROM ISP_VTR.rx_tx,zoftcom.ees,zoftcom.isp  where ees.fechainstalacion is not null and ees.fechabaja is null and ees.fechainstalacion <= now() and rx_tx.ees=zoftcom.ees.rbd and isp.id=ees.idisp and datetime =  from_unixtime(round(FLOOR(unix_timestamp(DATE_ADD(NOW(),INTERVAL -15 MINUTE))/(60*15))*(60*15)))  and rx_tx.inter=0 and rx>0 " | mysql --defaults-extra-file=/home/deck/.ees.cfg  -h 192.168.33.9 zoftcom  2>>null | tail -1)
     if [ "$v" == "" ]; then v=-1; fi
@@ -751,7 +751,7 @@ fi
     #TELFONICA
     export SSHPASS='Kubertnet$2022'
     export SSHUSER=admin
-    TELEFONICA_SSH='200.54.255.172'
+    TELEFONICA_SSH=200.54.255.172
 
     disk $TELEFONICA_SSH TELEFONICA
     servercpu $TELEFONICA_SSH TELEFONICA
@@ -765,7 +765,7 @@ fi
     #CLARO SNMP WEB
     export SSHPASS='Sof.,2025CoMWeb'
     export SSHUSER=softcom
-    CLARO_SNMP_WEB='10.255.249.36'
+    CLARO_SNMP_WEB=10.255.249.36
 
     disk $CLARO_SNMP_WEB CLAROWEB
     servercpu $CLARO_SNMP_WEB CLAROWEB
@@ -773,10 +773,11 @@ fi
     #CLARO SNMP COLLECTOR
     export SSHPASS='Sof..2025ComCol'
     export SSHUSER=softcom
-    CLARO_SNMP_COLLECTOR='172.30.250.28'
+    CLARO_SNMP_COLLECTOR=172.30.250.28
 
     disk $CLARO_SNMP_COLLECTOR CLAROCOLLECTOR
     servercpu $CLARO_SNMP_COLLECTOR CLAROCOLLECTOR
+    
 
     timeout 20 sshpass -e ssh -f -N -L 3308:127.0.0.1:3306 softcom@172.30.250.28 -p 2222 
     v=$(timeout 15 echo "SHOW processlist" | mysql --defaults-extra-file=/home/deck/.clarosnmp.cfg -h 127.0.0.1 -P 3308 2>&1 | wc -l)
