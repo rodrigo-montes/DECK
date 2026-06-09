@@ -287,7 +287,7 @@ fi
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_DNS1 cat /var/log/dnsparse.log | grep logfile | grep "^$dt" | awk '{print $8}' | grep queries | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD DNS1
+    fooreplace $v $EES_CLOUD_DNS1 DNS1
 
     #v=$(timeout 10 sshpass -e ssh $EES_CLOUD_DNS2 cat /var/log/dnsparse.log | grep logfile | grep "^$dt" | awk '{print $8}' | grep queries | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     #if [ "$v" == "" ] ; then v=-1; fi
@@ -295,7 +295,7 @@ fi
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_DNS1 cat /var/log/dnsparse.log | grep "log-file" | grep "^$dt" | awk '{print $8}' | grep consultas | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD T-DNS1
+    fooreplace $v $EES_CLOUD_DNS1 T-DNS1
 
     #v=$(timeout 10 sshpass -e ssh $EES_CLOUD_DNS2 cat /var/log/dnsparse.log | grep "log-file" | grep "^$dt" | awk '{print $8}' | grep consultas | awk 'BEGIN{sum=0;FS=":"}{sum=sum+$2}END{print sum}')
     #if [ "$v" == "" ] ; then v=-1; fi
@@ -756,7 +756,7 @@ fi
     disk $TELEFONICA_SSH TELEFONICA
     servercpu $TELEFONICA_SSH TELEFONICA
 
-    v=$(timeout 15 sshpass -e ssh -p 2222 $SSHUSER@$TELEFONICA_SSH "echo 'show processlist '| mysql --defaults-extra-file=/home/ees/my-ees.cnf zoftcom " | wc -l)
+    v=$(timeout 15 sshpass -e ssh -p 22 $SSHUSER@$TELEFONICA_SSH "echo 'show processlist '| mysql --defaults-extra-file=/home/ees/.my-ees.cnf zoftcom " | wc -l)
     if [ "$v" == "" ]; then v=-1; fi
     if [ "$v" == "1" ]; then v=-1; fi
     echo $v  > /tmp/$p/tmp/cloud_EES_INGBELL_MYSQL-processlist.txt
@@ -779,8 +779,7 @@ fi
     servercpu $CLARO_SNMP_COLLECTOR CLAROCOLLECTOR
     
 
-    timeout 20 sshpass -e ssh -f -N -L 3308:127.0.0.1:3306 softcom@172.30.250.28 -p 2222 
-    v=$(timeout 15 echo "SHOW processlist" | mysql --defaults-extra-file=/home/deck/.clarosnmp.cfg -h 127.0.0.1 -P 3308 2>&1 | wc -l)
+    v=$(timeout 15 sshpass -e ssh -p 22 $SSHUSER@$CLARO_SNMP_COLLECTOR "echo 'show processlist '| mysql --defaults-extra-file=/home/enlaces/.my-collector.cnf zoftcom " | wc -l)
     if [ "$v" == "" ]; then v=-1; fi
     if [ "$v" == "1" ]; then v=-1; fi
     echo $v  > /tmp/$p/tmp/cloud_EES_INGBELL_MYSQL-processlist.txt
