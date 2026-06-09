@@ -8,25 +8,25 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
     echo "$(date) PING" 
     
     telegram() {
-        GINFO=-1002805964119
-        GALERTA=-4936678208
-        URL_INFO="https://api.telegram.org/bot7495994507:AAFWMsjMLLlgWKxywrK1rezA68deR15AYb4/sendMessage"
-        URL_ALERTA="https://api.telegram.org/bot7934392704:AAEOhVgIUWq7QVNzi_otAHuO5MPNiZlVecA/sendMessage"
-
-        touch /tmp/p$1.event
-        nv=$(cat /tmp/p$1.event)
+        GINFO=-5224402961
+        GALERTA=-4893018440
+        URL_INFO="https://api.telegram.org/bot8967408977:AAEW0lXt21HIfEjrAt5GJdie1TpFIY3rh0s/sendMessage"
+        URL_ALERTA="https://api.telegram.org/bot8905921567:AAGihvlAIomIJCJ2vBJrTocr_5UIrky75BE/sendMessage"
+        
+        touch /tmp/$1.event
+        nv=$(cat /tmp/$1.event)
         if [ "$nv" == "" ] ; then 
-            echo 0 > /tmp/p$1.event
+            echo 0 > /tmp/$1.event
         else 
             if [ "$3" == "CLR" ] && [ $nv -ne 0 ]; then 
-                echo 0 > /tmp/p$1.event
+                echo 0 > /tmp/$1.event
                 msg="😆$2"
                 msgt="{\"chat_id\": \"$GINFO\", \"text\": \"$msg\", \"disable_notification\": true}"
                 curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_INFO
             else
                 if [ $nv -le 4 ] && [ "$3" != "CLR" ]; then 
                     let nv=nv+1
-                    echo $nv > /tmp/p$1.event
+                    echo $nv > /tmp/$1.event
                     msg="📢[$nv/5]: $2"
                     msgt="{\"chat_id\": \"$GINFO\", \"text\": \"$msg\", \"disable_notification\": true}"
                     curl -X POST -H 'Content-Type: application/json' -d "$msgt" $URL_INFO
@@ -36,9 +36,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
     }
 
     pping(){
-        v=$(ping -c 5 $1 | grep "0% packet loss" | awk '{gsub("%","");print $6}')
+        v=$(ping -c 5 $1 | grep transmitted | awk '{gsub("%","");print $6}')
         if [ "$v" == "" ] ; then v=100; fi
-        if [ "$v" == "+5" ] ; then v=100; fi
         echo "$2 $1 LOST: $v%"
         if [ $v -eq 100 ] ; then
             telegram $1 "$2 $1 PING LOST: $v%"
@@ -70,7 +69,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
     MSSQL=192.168.33.7
 
     pping $TOROMILLO TOROMILLO
-    # pping $LENGA LENGA
+    pping $LENGA LENGA
     pping $HUALLE HUALLE
     pping $ARAUCARIA ARAUCARIA
     pping $RAULI RAULI
