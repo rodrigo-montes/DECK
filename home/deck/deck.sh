@@ -313,6 +313,14 @@ fi
     if [ "$v" == "" ] ; then v=-1; fi
     fooreplace $v CLOUD WS33NOOK
 
+    v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/post.log | grep "^$dt" | grep MIKROTIK | grep ERROR | wc -l)
+    if [ "$v" == "" ] ; then v=-1; fi
+    fooreplace $v CLOUD RXTXMIKROTIK
+
+    v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/post.log | grep "^$dt" | grep FORTINET | grep ERROR | wc -l)
+    if [ "$v" == "" ] ; then v=-1; fi
+    fooreplace $v CLOUD RXTXFORTINET
+
     #line=$(timeout 10 sshpass -e ssh $HOTSPOT cat /var/log/dnsparse.log | grep logfile | grep "^$dt")
     #v=$(echo $line | awk '{gsub("queries:","");print $8*1}')
     #if [ "$v" == "" ] ; then v=-1; fi
