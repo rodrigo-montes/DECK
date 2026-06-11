@@ -303,23 +303,23 @@ fi
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/post.log | grep "^$dt" | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD POST
+    fooreplace $v $EES_CLOUD_POST1 POST
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_WS1 cat /var/log/ws.log | grep "^$dt" | grep slot | grep -v FINISH |  wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD WS
+    fooreplace $v $EES_CLOUD_WS1 WS
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_WS1 cat /var/log/ws.log | grep "^$dt" | grep slot | grep -v FINISH | grep -v "33 OK\|: 33-"  |  wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD WS33NOOK
+    fooreplace $v $EES_CLOUD_WS1 WS33NOOK
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/post.log | grep "^$dt" | grep MIKROTIK | grep ERROR | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD RXTXMIKROTIK
+    fooreplace $v $EES_CLOUD_POST1 RXTXMIKROTIK
 
     v=$(timeout 10 sshpass -e ssh $EES_CLOUD_POST1 cat /var/log/post.log | grep "^$dt" | grep FORTINET | grep ERROR | wc -l)
     if [ "$v" == "" ] ; then v=-1; fi
-    fooreplace $v CLOUD RXTXFORTINET
+    fooreplace $v $EES_CLOUD_POST1 RXTXFORTINET
 
     #line=$(timeout 10 sshpass -e ssh $HOTSPOT cat /var/log/dnsparse.log | grep logfile | grep "^$dt")
     #v=$(echo $line | awk '{gsub("queries:","");print $8*1}')
