@@ -731,7 +731,7 @@ fi
     v=$(timeout 15 sshpass -e ssh $INGBELL_NF cat /var/log/post.log 2>&1 | grep ssh | wc -l )
 
     if [ "$v" == "0" ] ; then 
-       v=$(timeout 10 sshpass -e ssh $INGBELL_NF cat /var/log/post.log | grep "$dt" | wc -l)
+       v=$(timeout 20 sshpass -e ssh $INGBELL_NF cat /var/log/post.log | grep "$dt" | wc -l)
        if [ "$v" == "" ] ; then v=-1; fi
     else 
        v=-1
